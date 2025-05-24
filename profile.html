@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile</title>
+    <link rel="stylesheet" href="../public/styles/style.css">
+</head>
+
+<body>
+
+    <div class="profile-container">
+        <h2>Welcome, <?php echo $username; ?>!</h2>
+        <p><strong>Email:</strong> <?php echo $email; ?></p>
+        <p><strong>Role:</strong> <?php echo $role; ?></p>
+        <p><a href="home.html">Go to homepage</a></p>
+
+        <form method="post">
+            <button type="submit" name="logout">Logout</button>
+        </form>
+    </div>
+
+</body>
+
+</html>

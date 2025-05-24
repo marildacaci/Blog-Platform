@@ -1,0 +1,124 @@
+
+
+// 1) get & sanitize post ID
+if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
+    echo '<p>Invalid post ID.</p>';
+    include 'path/to/footer.php';
+    exit;
+}
+$post_id = (int)$_GET['id'];
+
+// 2) fetch post + author
+$sql = "
+  SELECT p.id, p.user_id, p.title, p.image, p.paragraph, p.created_at,
+         u.username
+    FROM posts AS p
+    JOIN users AS u
+      ON p.user_id = u.id
+   WHERE p.id = $post_id
+   LIMIT 1
+";
+$res = mysqli_query($conn, $sql);
+
+if (! $res || mysqli_num_rows($res) === 0) {
+    echo '<p>Post not found.</p>';
+    include 'path/to/footer.php';
+    exit;
+}
+
+$post = mysqli_fetch_assoc($res);
+mysqli_free_result($res);
+?>
+<main style="max-width:800px; margin:2rem auto; padding:0 1rem;">
+  <!-- Post Header -->
+  <h1><?php echo htmlspecialchars($post['title']); ?></h1>
+  <p style="color:#555;">
+    by <strong><?php echo htmlspecialchars($post['username']); ?></strong>
+    &bull; <?php echo date('F j, Y, g:ia', strtotime($post['created_at'])); ?>
+  </p>
+
+  <!-- Post Image -->
+  <?php if ($post['image']): ?>
+    <img src="uploads/<?php echo htmlspecialchars($post['image']); ?>"
+         alt="<?php echo htmlspecialchars($post['title']); ?>"
+         style="width:100%; max-height:400px; object-fit:cover; border-radius:8px; margin:1rem 0;">
+  <?php endif; ?>
+
+  <!-- Post Content -->
+  <div style="line-height:1.6; color:#333; margin-bottom:2rem;">
+    <?php echo nl2br(htmlspecialchars($post['paragraph'])); ?>
+  </div>
+
+  <!-- Like Button -->
+  <form action="like.php" method="POST" style="margin-bottom:2rem;">
+    <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
+    <button type="submit" style="
+      background:#1a73e8;
+      color:#fff;
+      border:none;
+      padding:0.75rem 1.5rem;
+      border-radius:6px;
+      cursor:pointer;
+    ">
+      👍 Like
+    </button>
+  </form>
+
+  <!-- Comments Section -->
+  <section>
+    <h2>Comments</h2>
+
+    <?php
+    // 3) fetch comments for this post
+    $sqlC = "
+      SELECT c.comment, c.created_at, u.username
+        FROM comments AS c
+        JOIN users    AS u
+          ON c.user_id = u.id
+       WHERE c.post_id = $post_id
+       ORDER BY c.created_at DESC
+    ";
+    $resC = mysqli_query($conn, $sqlC);
+
+    if ($resC && mysqli_num_rows($resC) > 0):
+      while ($c = mysqli_fetch_assoc($resC)):
+    ?>
+      <div style="margin-bottom:1rem; padding:0.75rem; background:#f9f9f9; border-radius:4px;">
+        <p style="margin:0;"><strong><?php echo htmlspecialchars($c['username']); ?></strong>
+           <small style="color:#777;">
+             &bull; <?php echo date('F j, Y, g:ia', strtotime($c['created_at'])); ?>
+           </small>
+        </p>
+        <p style="margin:0.5rem 0 0;"><?php echo nl2br(htmlspecialchars($c['comment'])); ?></p>
+      </div>
+    <?php
+      endwhile;
+      mysqli_free_result($resC);
+    else:
+      echo '<p style="color:#666;">No comments yet. Be the first to comment!</p>';
+    endif;
+    ?>
+
+    <!-- Comment Form -->
+    <form action="comment_post.php" method="POST" style="margin-top:1.5rem;">
+      <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
+      <div style="margin-bottom:0.5rem;">
+        <textarea name="comment"
+                  rows="4"
+                  required
+                  placeholder="Write your comment here…"
+                  style="width:100%; padding:0.75rem; border-radius:4px; border:1px solid #ccc;"></textarea>
+      </div>
+      <button type="submit" style="
+        background:#1a73e8;
+        color:#fff;
+        border:none;
+        padding:0.5rem 1rem;
+        border-radius:6px;
+        cursor:pointer;
+      ">
+        Post Comment
+      </button>
+    </form>
+  </section>
+</main>
