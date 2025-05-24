@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add New Tag</title>
+  <link rel="stylesheet" href="../public/styles/style.css" />
+</head>
+
+<body>
+  <div class="login-container">
+    <h2>Add Tag</h2>
+    <form action="../backend/addTagLogic.php" method="post">
+      <input type="text" name="tag" placeholder="Tag Name" required />
+      <button type="submit" class="submit-btn">Add Tag</button>
+    </form>
+    <p style="text-align: center;"><a href="../home.php" class="back-link" style="color: white; ">← Back to Home</a></p>
+  </div>
+</body>
+
+</html>
